@@ -8,6 +8,8 @@ cmake_minimum_required(VERSION 3.16)
 
 project(ctags)
 
+set(CTAGS_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "ctags main directory" FORCE)
+
 include(CheckFunctionExists)
 include(CheckIncludeFile)
 
@@ -42,11 +44,15 @@ set(XML_SRCS parsers/maven2.c
 set(YAML_SRCS parsers/yaml.c
               parsers/ansibleplaybook.c)
 
-file(GLOB MAIN_SRCS RELATIVE ${CMAKE_SOURCE_DIR} main/*.c)
+file(GLOB MAIN_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} main/*.c)
 list(REMOVE_ITEM MAIN_SRCS main/mini-geany.c)
 file(GLOB OPTLIB_SRCS optlib/*.c)
 file(GLOB PARSERS_CXX_SRCS parsers/cxx/*.c)
-file(GLOB PARSERS_SRCS RELATIVE ${CMAKE_SOURCE_DIR} parsers/*.c)
+file(GLOB PARSERS_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} parsers/*.c)
+
+file(GLOB DSL_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} dsl/*.c)
+file(GLOB READ_TAGS_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} libreadtags/*.c)
+
 if (NOT DISABLE_XML)
   find_package(LibXml2 QUIET)
   if (NOT LibXml2_FOUND)
@@ -141,13 +147,17 @@ if (WIN32)
   endif()
 endif()
 
-configure_file(config.h.in.cmake "${CMAKE_BINARY_DIR}/config.h")
-include_directories(${CMAKE_BINARY_DIR})
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 add_definitions(-DHAVE_CONFIG_H)
 include_directories(main)
+include_directories(dsl)
+include_directories(libreadtags)
 
 add_executable(ctags
                ${MAIN_SRCS}
+               ${DSL_SRCS}
+               ${READ_TAGS_SRCS}
                ${OPTLIB_SRCS}
                ${PARSERS_SRCS}
                ${PARSERS_CXX_SRCS}

@@ -1,3 +1,4 @@
+build/
 *-actual.txt
 *-diff.txt
 *.func-sort-c.html
